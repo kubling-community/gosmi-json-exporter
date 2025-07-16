@@ -5,8 +5,6 @@ A simple CLI tool that parses SNMP MIB modules using [GoSMI](https://github.com/
 This project was created to provide a fully structured JSON representation of SNMP MIBs (including scalars, tables, and column types) with the specific goal of integrating into **Kubling**.  
 More information at [docs.kubling.com](https://docs.kubling.com/engine/ds/industrial/snmp).
 
----
-
 ## Features
 
 - Parses and loads SNMP MIB files
@@ -14,27 +12,30 @@ More information at [docs.kubling.com](https://docs.kubling.com/engine/ds/indust
   - Raw node definitions
   - SNMP table structures
   - Scalar groupings (separate, grouped, or all)
+  - Kubling-compatible SQL schema (DDL)
 - Outputs to stdout or file
 - Designed for CLI usage and automation
-
----
 
 ## Installation
 
 ```bash
-git clone https://github.com/youruser/gosmi-json-exporter
+git clone https://github.com/kubling-community/gosmi-json-exporter
 cd gosmi-json-exporter
 make build
 ```
 
 The built binary will be placed in `./bin/gosmi-json-exporter`.
 
----
-
 ## Usage
 
 ```bash
 ./bin/gosmi-json-exporter --mibdir ./testdata --module IF-MIB --dump-tables --out tables.json
+```
+
+To generate SQL schema:
+
+```bash
+./bin/gosmi-json-exporter --mibdir ./testdata --module IF-MIB --sql-schema --out schema.sql
 ```
 
 ### CLI Flags
@@ -47,11 +48,10 @@ The built binary will be placed in `./bin/gosmi-json-exporter`.
 | `--scalar-mode` | How to emit scalar nodes: `none`, `separate`, `grouped`, `all` |
 | `--group-depth` | Grouping depth for OID segments (used with `grouped`)          |
 | `--out`         | Output file (if not specified, defaults to stdout)             |
+| `--sql-schema`  | Output Kubling SQL DDL format                                  |
 | `--version`     | Show version and exit                                          |
 
----
-
-## Example Output
+## Example JSON Output
 
 ```json
 {
@@ -75,8 +75,6 @@ The built binary will be placed in `./bin/gosmi-json-exporter`.
 }
 ```
 
----
-
 ## Development
 
 ### Run Tests
@@ -86,8 +84,6 @@ make test
 ```
 
 Tests use a minimal, dependency-controlled MIB set under `./testdata`. You can extend this directory with your own `.mib` files.
-
----
 
 ## Working with MIBs
 
@@ -105,6 +101,8 @@ You can extract specific modules or load the entire tree using the `--mibdir` fl
 ```bash
 ./bin/gosmi-json-exporter --mibdir /path/to/observium/mibs --module UPS-MIB
 ```
+
+---
 
 ### About `snmp_derived_index` Support
 
@@ -125,8 +123,6 @@ If you’re interested in contributing or experimenting with automatic detection
 
 - [gosmi](https://github.com/sleepinggenius2/gosmi) for the excellent Go SNMP parser
 - MIB files sourced from various RFC and vendor public repositories
-
----
 
 ## License
 
