@@ -1,6 +1,6 @@
 # gosmi-json-exporter
 
-A simple CLI tool that parses SNMP MIB modules using [GoSMI](https://github.com/sleepinggenius2/gosmi) and exports their structure as JSON.
+A simple CLI tool that parses SNMP MIB modules using [GoSMI](https://github.com/sleepinggenius2/gosmi) and exports their structure as JSON and Kubling Schema.
 
 This project was created to provide a fully structured JSON representation of SNMP MIBs (including scalars, tables, and column types) with the specific goal of integrating into **Kubling**.  
 More information at [docs.kubling.com](https://docs.kubling.com/engine/ds/industrial/snmp).
@@ -120,7 +120,6 @@ If you require `snmp_derived_index` for more advanced or nested table modeling (
 - Use external reference projects like [`observium`](https://github.com/pgmillon/observium) to help explore and understand complex index structures before editing.
 
 If you’re interested in contributing or experimenting with automatic detection of derived indexes, feel free to open a discussion or pull request.
-
 
 ## Acknowledgments
 
