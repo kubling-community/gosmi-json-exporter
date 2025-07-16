@@ -1,0 +1,42 @@
+# Binaries
+/bin/
+/build/
+/dist/
+/*.exe
+/*.dll
+/*.so
+/*.dylib
+/*.out
+
+# Test binary and cache
+*.test
+*.prof
+*.coverprofile
+*.log
+/testdata/**/output.json
+
+# Go workspace stuff
+go.sum
+go.work
+go.work.sum
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+vendor/
+
+# Go modules cache
+.gomodcache/
+
+# Misc
+*.tmp
+*.temp
