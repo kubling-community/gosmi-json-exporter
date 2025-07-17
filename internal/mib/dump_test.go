@@ -62,3 +62,64 @@ func TestInvalidScalarMode(t *testing.T) {
 		t.Errorf("Expected error for invalid scalar mode, got: %v", err)
 	}
 }
+
+func TestDumpModule_GroupedScalars(t *testing.T) {
+	gosmi.Init()
+	gosmi.AppendPath("../../testdata")
+
+	modName, err := gosmi.LoadModule("IF-MIB")
+	if err != nil {
+		t.Fatalf("Failed to load IF-MIB: %v", err)
+	}
+	mod, err := gosmi.GetModule(modName)
+	if err != nil {
+		t.Fatalf("Failed to get module: %v", err)
+	}
+
+	data, err := DumpModule(mod, DumpOptions{
+		ScalarMode: "grouped",
+		GroupDepth: 5,
+	})
+	if err != nil {
+		t.Fatalf("DumpModule failed: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if _, ok := result["tables"]; !ok {
+		t.Errorf("Expected 'tables' key in output for grouped scalar mode")
+	}
+}
+
+func TestDumpModule_AllScalars(t *testing.T) {
+	gosmi.Init()
+	gosmi.AppendPath("../../testdata")
+
+	modName, err := gosmi.LoadModule("IF-MIB")
+	if err != nil {
+		t.Fatalf("Failed to load IF-MIB: %v", err)
+	}
+	mod, err := gosmi.GetModule(modName)
+	if err != nil {
+		t.Fatalf("Failed to get module: %v", err)
+	}
+
+	data, err := DumpModule(mod, DumpOptions{
+		ScalarMode: "all",
+	})
+	if err != nil {
+		t.Fatalf("DumpModule failed: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if _, ok := result["tables"]; !ok {
+		t.Errorf("Expected 'tables' key in output for scalar-mode=all")
+	}
+}

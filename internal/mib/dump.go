@@ -38,7 +38,6 @@ type DumpOptions struct {
 }
 
 func DumpModule(mod gosmi.SmiModule, opts DumpOptions) ([]byte, error) {
-	// Validate scalar mode
 	validModes := map[string]bool{"none": true, "separate": true, "grouped": true, "all": true}
 	if !validModes[opts.ScalarMode] {
 		return nil, fmt.Errorf("invalid scalar mode: %s", opts.ScalarMode)
@@ -52,11 +51,20 @@ func DumpModule(mod gosmi.SmiModule, opts DumpOptions) ([]byte, error) {
 		}, "", "  ")
 	}
 
-	nodes := extractNodes(mod)
-	return json.MarshalIndent(map[string]interface{}{
-		"module": mod.Name,
-		"nodes":  nodes,
-	}, "", "  ")
+	switch opts.ScalarMode {
+	case "separate", "grouped", "all":
+		scalars := extractScalars(mod, opts.ScalarMode, opts.GroupDepth)
+		return json.MarshalIndent(map[string]interface{}{
+			"module": mod.Name,
+			"tables": scalars,
+		}, "", "  ")
+	default:
+		nodes := extractNodes(mod)
+		return json.MarshalIndent(map[string]interface{}{
+			"module": mod.Name,
+			"nodes":  nodes,
+		}, "", "  ")
+	}
 }
 
 func extractNodes(mod gosmi.SmiModule) []Node {
@@ -115,6 +123,60 @@ func extractTables(mod gosmi.SmiModule) []TableDefinition {
 			OriginalOid:    tableOid,
 			OriginalModule: mod.Name,
 		})
+	}
+
+	return tables
+}
+
+func extractScalars(mod gosmi.SmiModule, mode string, groupDepth int) []TableDefinition {
+	nodes := mod.GetNodes()
+	grouped := map[string][]TableColumn{}
+	var tables []TableDefinition
+
+	for _, n := range nodes {
+		if n.Kind != types.NodeScalar || n.Type == nil {
+			continue
+		}
+
+		col := TableColumn{
+			Name:        n.Name,
+			Oid:         n.Oid.String(),
+			Type:        n.Type.Name,
+			Description: n.Description,
+		}
+
+		switch mode {
+		case "separate":
+			tables = append(tables, TableDefinition{
+				Name:           "scalar_" + n.Name,
+				Description:    n.Description,
+				OidPrefix:      n.Oid.String(),
+				Columns:        []TableColumn{col},
+				OriginalModule: mod.Name,
+			})
+		case "grouped":
+			parts := strings.Split(n.Oid.String(), ".")
+			depth := groupDepth
+			if depth <= 0 || depth > len(parts) {
+				depth = len(parts)
+			}
+			prefix := strings.Join(parts[:depth], ".")
+			grouped[prefix] = append(grouped[prefix], col)
+		case "all":
+			grouped["__all__"] = append(grouped["__all__"], col)
+		}
+	}
+
+	if mode == "grouped" || mode == "all" {
+		for prefix, cols := range grouped {
+			tables = append(tables, TableDefinition{
+				Name:           "scalar_group_" + strings.ReplaceAll(prefix, ".", "_"),
+				Description:    "Grouped scalar metrics under " + prefix,
+				OidPrefix:      prefix,
+				Columns:        cols,
+				OriginalModule: mod.Name,
+			})
+		}
 	}
 
 	return tables
